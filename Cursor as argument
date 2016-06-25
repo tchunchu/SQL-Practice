@@ -1,0 +1,33 @@
+/* Sql script to send cursor as a argument to procedure from another procedure*/
+
+set serveroutput on;
+CREATE OR REPLACE PROCEDURE procBalanceSelect AS
+SYS_CUR  SYS_REFCURSOR;
+
+PROCEDURE procAcceptCurAsArg(CUR in SYS_REFCURSOR) AS
+TYPE rec is RECORD (F_Name client1.First_Name%type,
+                    L_Name CLIENT1.LAST_NAME%type,
+                    Balnc ACCOUNT1.BALANCE%type);
+myrec rec;
+
+BEGIN
+
+LOOP
+	FETCH cur INTO myrec;
+	EXIT WHEN CUR%NOTFOUND;
+     DBMS_OUTPUT.PUT_LINE(myrec.f_name ||' ' ||myrec.l_name || ' ' || myrec.Balnc);					                                      
+END LOOP;
+
+END;
+
+
+BEGIN
+OPEN SYS_CUR FOR SELECT C.First_Name,C.Last_Name,A.Balance from CLIENT1 C, ACCOUNT1 A WHERE C.ID_CL = A.ID_CL AND A.Balance >= 4000 ;
+procAcceptCurAsArg(SYS_CUR);
+CLOSE SYS_CUR;
+END;
+
+  
+/
+
+exec procBalanceSelect;  
